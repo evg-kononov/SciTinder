@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  fast-api:
+    env_file:
+      - .env
+    build:
+      context: ../
+    ports:
+      - ${FAST_API_EXTERNAL_PORT}:${FAST_API_PORT}
+    stdin_open: true
+    tty: true
