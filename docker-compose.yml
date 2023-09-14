@@ -4,9 +4,16 @@ services:
   fast-api:
     env_file:
       - .env
+    # Path to Dockerfile relative to docker-compose.yml
     build:
-      context: ../
+      context: ./fast-api
+    volumes:
+      - ./fast-api:/fast-api
+      - ./fast-api/data:/fast-api/data # TODO: нужно ли так писать, если уже смонтирован ./fast-api со всеми вложенными папками?
     ports:
       - ${FAST_API_EXTERNAL_PORT}:${FAST_API_PORT}
+    networks:
+      - fast-api
     stdin_open: true
     tty: true
+    restart: on-failure

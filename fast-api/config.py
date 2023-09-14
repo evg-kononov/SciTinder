@@ -14,11 +14,10 @@ SBERT_PREDICT_URL = SBERT_API + "/predictions/" + SBERT_NAME
 if not os.getenv("DOCKER"):
     api = "http://localhost:8080/"
 else:
-    api = f"http://api:{os.getenv('API_PORT', 3000)}/"
+    api = f"http://api:{os.getenv('API_PORT', 3001)}/"
 get_author_by_id = api + "author/findById" + "?id={}"
 
-#root_path = r"./data"
-root_path = r"H:/streamlit_data"
+root_path = r"./data"
 adjacency_list_path = os.path.join(root_path, "adjacency_list.pkl")
 publication_author_path = os.path.join(root_path, "publication_author.parquet")
 corpus_embeddings_path = os.path.join(root_path, "embeddings_all-mpnet-base-v2.pt")
