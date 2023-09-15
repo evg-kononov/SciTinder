@@ -2,10 +2,36 @@ version: '3.8'
 
 services:
   redis:
-    image:
+    env_file:
+      - .env
+    image: redis:7.2
+    entrypoint:
+      - ALLOW_EMPTY_PASSWORD=yes
+    volumes:
+      - redis:/data
+    ports:
+      - ${REDIS_EXTERNAL_PORT}:${REDIS_PORT}
+    networks:
+      - redis-api
+    restart: always
+
+  torch-serve:
+    env_file:
+      - .env
+    build:
+      context: ./torch-serve
+    ports:
+      - ${TORCH_SERVE_EXTERNAL_API_PORT}:${TORCH_SERVE_API_PORT}
+    networks:
+      - torch-serve-api
+    stdin_open: true
+    tty: true
+    restart: on-failure
+
   fast-api:
     depends_on:
       - redis
+      - torch-serve
     env_file:
       - .env
     # Path to Dockerfile relative to docker-compose.yml
@@ -17,7 +43,13 @@ services:
     ports:
       - ${FAST_API_EXTERNAL_PORT}:${FAST_API_PORT}
     networks:
+      - redis-api
+      - torch-serve-api
       - fast-api-network
     stdin_open: true
     tty: true
     restart: on-failure
+
+volumes:
+  redis:
+    driver: local

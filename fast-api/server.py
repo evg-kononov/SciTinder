@@ -57,7 +57,7 @@ def apply_filter(filter: Filter):
 
 def sbert_predict(queries: List[str]):
     response = requests.post(
-        SBERT_PREDICT_URL,
+        TORCH_SERVE_PREDICT_URL,
         data={"data": json.dumps({"queries": queries})}
     )
 
