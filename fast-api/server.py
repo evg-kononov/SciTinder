@@ -16,6 +16,8 @@ from pydantic import BaseModel, Field
 from util import dot_score
 from resources import *
 from config import *
+from entourage_search import author_preparation, async_get_data_from_list
+from visualization import graph_visualization, graph_data_preparation, create_edges, create_nodes
 
 r = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, decode_responses=True)
 
@@ -184,6 +186,19 @@ def similarity_search(
 
     response = SimilarityResponse(similarity=similarity)
     return response
+
+
+@app.post("/plotly/create-figure/")
+def create_figure(
+        source_id: Annotated[int, Body(title="Source ID", description="Scientist ID from the database (primary key)")],
+        target_id: Annotated[int, Body(title="Target ID", description="Scientist ID from the database (primary key)")],
+        knees_num: Annotated[Union[int, None], Body(gt=0)] = 10,
+):
+        pos, node_idxs = graph_data_preparation(cache_data["adjacency_list"], source_id, target_id, knees_num=knees_num)
+        nodes = create_nodes(node_idxs, GET_AUTHOR_BY_ID)
+        edges = create_edges(node_idxs, cache_data["publication_author"])
+        fig = graph_visualization(nodes, edges, pos)
+        return fig.to_json()
 
 
 if __name__ == "__main__":

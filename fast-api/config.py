@@ -14,12 +14,12 @@ else:
     REDIS_HOST = "redis"
     REDIS_PORT = os.getenv('REDIS_PORT', 6379)
 
-    TORCH_SERVE_API = f"http://torch-serve:{os.getenv('TORCH_SERVE_API_PORT', 3004)}"
+    TORCH_SERVE_API = f"http://torch-serve:{os.getenv('TORCH_SERVE_API_PORT', 3010)}"
     TORCH_SERVE_PREDICT_URL = TORCH_SERVE_API + "/predictions/" + TORCH_SERVE_MODEL_NAME
 
     SPRING_API = f"http://spring-api:{os.getenv('SPRING_API_PORT', 3001)}/"
 
-# get_author_by_id = SPRING_API + "author/findById" + "?id={}"
+GET_AUTHOR_BY_ID = SPRING_API + "author/findById" + "?id={}"
 
 root_path = r"./data"
 adjacency_list_path = os.path.join(root_path, "adjacency_list.pkl")

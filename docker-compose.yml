@@ -21,7 +21,7 @@ services:
     build:
       context: ./torch-serve
     ports:
-      - ${TORCH_SERVE_EXTERNAL_API_PORT}:${TORCH_SERVE_API_PORT}
+      - ${TORCH_SERVE_EXTERNAL_INFERENCE_PORT}:${TORCH_SERVE_INFERENCE_PORT}
     networks:
       - torch-serve-api
     stdin_open: true
