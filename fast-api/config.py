@@ -21,7 +21,8 @@ else:
 
 GET_AUTHOR_BY_ID = SPRING_API + "author/findById" + "?id={}"
 
-root_path = r"./data"
+#root_path = r"./data"
+root_path = r"D:/streamlit_data"
 adjacency_list_path = os.path.join(root_path, "adjacency_list.pkl")
 publication_author_path = os.path.join(root_path, "publication_author.parquet")
 corpus_embeddings_path = os.path.join(root_path, "embeddings_all-mpnet-base-v2.pt")

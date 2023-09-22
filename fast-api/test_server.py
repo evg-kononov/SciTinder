@@ -36,3 +36,15 @@ def test_similarity_search_findByFile():
     )
     return response
 
+
+def test_crete_figure():
+    response = client.post(
+        url="/plotly/create-figure/",
+        json={
+            "source_id": 5,
+            "target_id": 9
+        }
+    )
+    return response
+
+
