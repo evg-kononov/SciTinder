@@ -5,6 +5,7 @@ FROM pytorch/torchserve:0.8.2-cpu
 WORKDIR /torch-serve
 
 COPY requirements.txt /torch-serve/requirements.txt
+COPY config.properties /torch-serve/config.properties
 RUN python -m pip install --upgrade pip
 RUN pip install --no-cache-dir --upgrade -r /torch-serve/requirements.txt
 
