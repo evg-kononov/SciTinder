@@ -6,7 +6,7 @@ COPY requirements.txt /fast-api/requirements.txt
 RUN pip install --no-cache-dir --upgrade -r /fast-api/requirements.txt
 # RUN pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118 # GPU здесь не требуется
 
-COPY ./fast-api /fast-api
+COPY . .
 ENV DOCKER=true
 ENTRYPOINT ["uvicorn", "server:app"]
 CMD ["--host", "0.0.0.0", "--port", "3002"]
