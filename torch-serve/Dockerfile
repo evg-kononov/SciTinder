@@ -7,7 +7,9 @@ WORKDIR /torch-serve
 COPY requirements.txt /torch-serve/requirements.txt
 COPY config.properties /torch-serve/config.properties
 COPY all-mpnet-base-v2.mar /torch-serve/model_store/all-mpnet-base-v2.mar
+USER root
 RUN chmod 777 /torch-serve/model_store/all-mpnet-base-v2.mar
+USER model-server
 RUN python -m pip install --upgrade pip
 RUN pip install --no-cache-dir --upgrade -r /torch-serve/requirements.txt
 
