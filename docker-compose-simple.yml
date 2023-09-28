@@ -1,25 +1,6 @@
 version: '3.8'
 
 services:
-  spring-boot-api:
-    #depends_on:
-    #  - postgres
-    env_file:
-      - .env
-    build:
-      context: ./spring-boot-api
-    volumes:
-      - ./spring-boot-api/.m2:/root/.m2
-    ports:
-      - ${SPRING_BOOT_API_EXTERNAL_PORT}:${SPRING_BOOT_API_PORT}
-    networks:
-      - spring-boot-api-network
-      # - db-api
-      - fast-api-network
-    tty: true
-    stdin_open: true
-    restart: on-failure
-
   redis:
     env_file:
       - .env
@@ -68,6 +49,16 @@ services:
     stdin_open: true
     tty: true
     restart: on-failure
+
+  nginx:
+    image: nginx
+    volumes:
+      - ./nginx:/etc/nginx/conf.d
+    ports:
+      - ${NGINX_EXTERNAL_PORT}:${NGINX_PORT}
+    networks:
+      - fast-api-network
+    restart: always
 
 volumes:
   redis:

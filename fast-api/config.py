@@ -17,7 +17,7 @@ else:
     TORCH_SERVE_API = f"http://torch-serve:{os.getenv('TORCH_SERVE_API_PORT', 3010)}"
     TORCH_SERVE_PREDICT_URL = TORCH_SERVE_API + "/predictions/" + TORCH_SERVE_MODEL_NAME
 
-    SPRING_API = f"http://spring-api:{os.getenv('SPRING_API_PORT', 3001)}/"
+    SPRING_API = f"http://spring-boot-api:{os.getenv('SPRING_BOOT_API_PORT', 3001)}/"
 
 GET_AUTHOR_BY_ID = SPRING_API + "author/findById" + "?id={}"
 
