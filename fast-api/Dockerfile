@@ -4,7 +4,7 @@ WORKDIR /fast-api
 
 COPY requirements.txt /fast-api/requirements.txt
 RUN pip install --no-cache-dir --upgrade -r /fast-api/requirements.txt
-# RUN pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118 # GPU здесь не требуется
+RUN pip install torch --no-cache-dir --index-url https://download.pytorch.org/whl/cpu
 
 COPY . .
 ENV DOCKER=true
