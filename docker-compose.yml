@@ -4,6 +4,7 @@ services:
   spring-boot-api:
     #depends_on:
     #  - postgres
+    hostname: spring-boot-api
     env_file:
       - .env
     build:
@@ -21,6 +22,7 @@ services:
     restart: on-failure
 
   redis:
+    hostname: redis
     env_file:
       - .env
     image: redis:7.2
@@ -35,6 +37,7 @@ services:
     restart: always
 
   torch-serve:
+    hostname: torch-serve
     env_file:
       - .env
     build:
@@ -48,6 +51,7 @@ services:
     restart: on-failure
 
   fast-api:
+    hostname: fast-api
     depends_on:
       - redis
       - torch-serve
