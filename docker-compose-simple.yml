@@ -39,7 +39,7 @@ services:
       context: ./fast-api
     volumes:
       - ./fast-api:/fast-api
-      - ./fast-api/data:/fast-api/data:ro # TODO: нужно ли так писать, если уже смонтирован ./fast-api со всеми вложенными папками?
+      - ./data:/fast-api/data:ro # TODO: нужно ли так писать, если уже смонтирован ./fast-api со всеми вложенными папками?
     ports:
       - ${FAST_API_EXTERNAL_PORT}:${FAST_API_PORT}
     networks:
