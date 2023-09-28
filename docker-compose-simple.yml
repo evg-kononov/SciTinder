@@ -67,5 +67,5 @@ volumes:
 networks:
   spring-boot-network:
   redis-network:
-  torch-serve-networks:
+  torch-serve-network:
   fast-api-network:
