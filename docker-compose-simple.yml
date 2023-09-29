@@ -30,8 +30,8 @@ services:
     tty: true
     restart: on-failure
 
-  fast-api1:
-    hostname: fast-api1
+  fast-api:
+    hostname: fast-api
     depends_on:
       - redis
       - torch-serve
@@ -44,7 +44,7 @@ services:
       - ./fast-api:/fast-api
       - ./data:/fast-api/data:ro # TODO: нужно ли так писать, если уже смонтирован ./fast-api со всеми вложенными папками?
     ports:
-      - "5032:3032"
+      - ${FAST_API_EXTERNAL_PORT}:${FAST_API_PORT}
     networks:
       - redis-network
       - torch-serve-network
@@ -100,10 +100,6 @@ services:
     restart: on-failure
 
   nginx:
-    depends_on:
-      - fast-api1
-      - fast-api2
-      - fast-api3
     hostname: nginx
     image: nginx
     volumes:
