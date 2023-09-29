@@ -30,8 +30,8 @@ services:
     tty: true
     restart: on-failure
 
-  fast-api:
-    hostname: fast-api
+  fast-api1:
+    hostname: fast-api1
     depends_on:
       - redis
       - torch-serve
@@ -45,6 +45,52 @@ services:
       - ./data:/fast-api/data:ro # TODO: нужно ли так писать, если уже смонтирован ./fast-api со всеми вложенными папками?
     ports:
       - ${FAST_API_EXTERNAL_PORT}:${FAST_API_PORT}
+    networks:
+      - redis-network
+      - torch-serve-network
+      - fast-api-network
+    stdin_open: true
+    tty: true
+    restart: on-failure
+
+  fast-api2:
+    hostname: fast-api2
+    depends_on:
+      - redis
+      - torch-serve
+    env_file:
+      - .env
+    # Path to Dockerfile relative to docker-compose.yml
+    build:
+      context: ./fast-api
+    volumes:
+      - ./fast-api:/fast-api
+      - ./data:/fast-api/data:ro # TODO: нужно ли так писать, если уже смонтирован ./fast-api со всеми вложенными папками?
+    ports:
+      - "5012:3012"
+    networks:
+      - redis-network
+      - torch-serve-network
+      - fast-api-network
+    stdin_open: true
+    tty: true
+    restart: on-failure
+
+  fast-api3:
+    hostname: fast-api3
+    depends_on:
+      - redis
+      - torch-serve
+    env_file:
+      - .env
+    # Path to Dockerfile relative to docker-compose.yml
+    build:
+      context: ./fast-api
+    volumes:
+      - ./fast-api:/fast-api
+      - ./data:/fast-api/data:ro # TODO: нужно ли так писать, если уже смонтирован ./fast-api со всеми вложенными папками?
+    ports:
+      - "5022:3022"
     networks:
       - redis-network
       - torch-serve-network
