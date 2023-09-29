@@ -79,13 +79,6 @@ def calculate_similarity(query_embedding, corpus_embeddings, embedding_idxs, top
     return similarity, target_idxs
 
 
-value = [0]
-@app.get("/counter/")
-def counter():
-    value[0] += 1
-    return value[0]
-
-
 @app.post("/similarity-search/findById/")
 def similarity_search( # async def or just "def"???
         source_id: Annotated[int, Body(title="Source ID", description="Scientist ID from the database (primary key)")],
