@@ -44,7 +44,7 @@ services:
       - ./fast-api:/fast-api
       - ./data:/fast-api/data:ro # TODO: нужно ли так писать, если уже смонтирован ./fast-api со всеми вложенными папками?
     ports:
-      - ${FAST_API_EXTERNAL_PORT}:${FAST_API_PORT}
+      - "5032:3032"
     networks:
       - redis-network
       - torch-serve-network
