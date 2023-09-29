@@ -8,7 +8,7 @@ r = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, decode_responses=True)
 app = FastAPI()
 
 value = [0]
-@app.get("/counter/")
+@app.get("/counter")
 def counter():
     value[0] += 1
     return value[0]
