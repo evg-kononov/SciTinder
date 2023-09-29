@@ -100,6 +100,10 @@ services:
     restart: on-failure
 
   nginx:
+    depends_on:
+      - fast-api1
+      - fast-api2
+      - fast-api3
     hostname: nginx
     image: nginx
     volumes:
