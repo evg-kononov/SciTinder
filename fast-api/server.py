@@ -14,5 +14,11 @@ def counter():
     return value[0]
 
 
+@app.get("/counter-redis")
+def counter():
+    value[0] += 1
+    return value[0]
+
+
 if __name__ == "__main__":
     uvicorn.run(app, host="127.0.0.1", port=8009)
