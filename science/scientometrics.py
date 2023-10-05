@@ -8,22 +8,8 @@ import pickle
 from tqdm import tqdm
 from itertools import repeat
 from util import *
+from visualization import *
 
-
-root_path = r"D:\streamlit_data"
-root_path_parquet = r"D:\data lake\entities"
-adjacency_list_path = os.path.join(root_path, "adjacency_list.pkl")
-embedding_idxs_path = os.path.join(root_path, "idxs_all-mpnet-base-v2.pt")
-author_path = os.path.join(root_path_parquet, "author.parquet")
-organization_path = os.path.join(root_path_parquet, "organization.parquet")
-
-author_df = pd.read_parquet(author_path)
-organization_df = pd.read_parquet(organization_path)
-with open(adjacency_list_path, "rb") as f:
-    adjacency_list = pickle.load(f)
-embedding_idxs = torch.load(embedding_idxs_path)
-
-author_df = author_df.iloc[embedding_idxs - 1]
 
 def entourage_coverage(author_df, organization_df, adjacency_list, organization_name=None, k=5):
     """
@@ -40,10 +26,31 @@ def entourage_coverage(author_df, organization_df, adjacency_list, organization_
         author_df = author_df[author_df["organization_id"] == float(required_idx)]
         required_idxs = author_df.index.values + 1
 
-    for k_i in range(1, k + 1):
-        for source_id in required_idxs:
-            pass
-    pass
+    source_entourages = []
+    for source_id in tqdm(required_idxs):
+        tree = find_entourage_for_stats(adjacency_list, source_id, k)
+        source_entourages.append(tree)
+    return source_entourages
+
+
+if __name__ == "__main__":
+    root_path = r"C:\data\streamlit_data"
+    root_path_parquet = r"C:\data\data lake\entities"
+    adjacency_list_path = os.path.join(root_path, "adjacency_list.pkl")
+    embedding_idxs_path = os.path.join(root_path, "idxs_all-mpnet-base-v2.pt")
+    author_path = os.path.join(root_path_parquet, "author.parquet")
+    organization_path = os.path.join(root_path_parquet, "organization.parquet")
+
+    author_df = pd.read_parquet(author_path)
+    organization_df = pd.read_parquet(organization_path)
+    with open(adjacency_list_path, "rb") as f:
+        adjacency_list = pickle.load(f)
+    embedding_idxs = torch.load(embedding_idxs_path)
+
+    author_df = author_df.iloc[embedding_idxs - 1]
+
+    source_entourages = entourage_coverage(author_df, organization_df, adjacency_list, "PAWLIN Technologies LLC", 5)
+    plot_entourage_coverage(source_entourages)
 
 """
 

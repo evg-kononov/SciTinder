@@ -1,14 +1,49 @@
-def find_tree_for_stats(adjacency_list: dict, source_id: int, knees_num: int):
+def flatten(l: list):
+    return [item for sublist in l for item in sublist]
+
+
+def intersection(l1, l2):
+    return list(set(l1) & set(l2))
+
+
+def difference(l1, l2):
+    return list(set(l1) - set(l2))
+
+
+def find_entourage_for_stats(adjacency_list: dict, source_id: int, knees_num: int):
+    """Проводит поиск окружений вплодь до knees_num порядка для ученого с source_id. Причем ученые из i окружения
+    не встречаются в i+1...knees_num окружениях (другими словами, в окружениях нет повторяющихся ученых).
+    Данная функция позволяет узнать, сколько новых знакомств можно завести, если идти через каждого ученого
+    в каждом окружении, пробираясь вглубь.
+
+    :param adjacency_list: список смежности (словарь, где key - индекс автора, value - индексы соавторов)
+    :param source_id: идентификатор ученого из базы данных (счет начинается с 1)
+    :param knees_num: количество окружений для поиска
+    :return: список с количеством уникальных ученых в каждом окружении у ученого с source_id
+    """
     source_entourages = {}
     source_family_tree = {}
 
+    unique_keys = set()
     source_family_tree[source_id] = adjacency_list[source_id]
-    source_entourages[1] = adjacency_list[source_id]
-    for knee in range(knees_num - 1):
-        source_family_tree = {
-            value: adjacency_list[value] for key, values in source_family_tree.items() for value in values
-        }
-        source_entourages[knee + 1] = source_family_tree
+    for knee in range(0, knees_num):
+        new_source_family_tree = {}
+        # TODO: это можно ускорить, оставляя только уникальные values (они могут пересекаться, поэтому идет перезаписывание одного и того же ключа в dict)
+        for key, values in source_family_tree.items():
+            values = set(values)
+            inter = unique_keys & values
+            if len(inter) != 0:
+                values = values - unique_keys
+                unique_keys = unique_keys | values
+            else:
+                unique_keys = unique_keys | values
+
+            for value in values:
+                new_source_family_tree[value] = adjacency_list[value]
+
+        source_entourages[knee + 1] = new_source_family_tree
+        source_family_tree = new_source_family_tree
+
     return list(map(lambda x: len(source_entourages[x]), source_entourages.keys()))
 
 
