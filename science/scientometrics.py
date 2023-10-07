@@ -27,50 +27,61 @@ def get_required_idxs(author_df, organization_df, organization_name):
     return required_idxs
 
 
-def entourage_coverage(adjacency_list, required_idxs=None, k=5):
+def entourage_coverage(adjacency_list, required_idxs=None, k=5, parallel=False):
     """
     :param adjacency_list: список смежности (словарь, где key - индекс автора, value - индексы соавторов)
     :param required_idxs: список требуемых индексов авторов для подсчета статистики
     :param k: порядок окружение, вплоть до которого производится расчет статистики
+    :param parallel: выполнение функции в режиме multiprocessing
     :return:
     """
 
     if required_idxs is None:
         required_idxs = list(adjacency_list.keys())
 
-    source_entourages = []
-    for source_id in tqdm(required_idxs):
-        tree = find_entourage_for_stats(adjacency_list, source_id, k)
-        source_entourages.append(tree)
+    if parallel:
+        with Pool() as pool:
+            source_entourages = list(pool.starmap(
+                    find_entourage_for_stats,
+                    zip(repeat(adjacency_list), required_idxs, repeat(k))
+                )
+            )
+    else:
+        source_entourages = []
+        for source_id in tqdm(required_idxs):
+            tree = find_entourage_for_stats(adjacency_list, source_id, k)
+            source_entourages.append(tree)
     return source_entourages
 
 
-def handshake_distribution(adjacency_list, required_idxs=None, k=10):
+def handshake_distribution(adjacency_list, required_idxs=None, k=10, parallel=False):
     """
 
     :param adjacency_list: список смежности (словарь, где key - индекс автора, value - индексы соавторов)
     :param required_idxs: список требуемых индексов авторов для подсчета статистики
     :param k: порядок окружение, вплоть до которого производится расчет статистики (количество bins в распределении)
+    :param parallel: выполнение функции в режиме multiprocessing
     :return:
     """
     if required_idxs is None:
         required_idxs = list(adjacency_list.keys())
 
     handshake_number = []
-    for source_id in tqdm(required_idxs):
-        with Pool() as pool:
-            temp = list(pool.starmap(
-                parallel_find_tree_from_list,
-                zip(repeat(adjacency_list), repeat(source_id), list(adjacency_list.keys()), repeat(k // 2))
-            ))
-        handshake_number.append(temp)
-        """
-        for target_id in list(adjacency_list.keys()):
-            source_tree, target_tree, inter = find_tree_from_list(adjacency_list, source_id, target_id, k // 2)
-            if inter is not None:
-                handshake_number.append(len(source_tree.keys()) + len(target_tree.keys()))
-        """
-
+    if parallel:
+        for source_id in tqdm(required_idxs):
+            with Pool() as pool:
+                distances = list(pool.starmap(
+                    source_target_distance,
+                    zip(repeat(adjacency_list), repeat(source_id), list(adjacency_list.keys()), repeat(k // 2))
+                ))
+            handshake_number.append(distances)
+        handshake_number = flatten(handshake_number)
+    else:
+        for source_id in tqdm(required_idxs):
+            for target_id in list(adjacency_list.keys()):
+                source_tree, target_tree, inter = find_tree_from_list(adjacency_list, source_id, target_id, k // 2)
+                if inter is not None:
+                    handshake_number.append(len(source_tree.keys()) + len(target_tree.keys()))
     return handshake_number
 
 

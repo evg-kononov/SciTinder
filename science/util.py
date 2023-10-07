@@ -78,9 +78,7 @@ def find_tree_from_list(adjacency_list: dict, source_id: int, target_id: int, kn
     return source_tree, target_tree, None
 
 
-def parallel_find_tree_from_list(adjacency_list: dict, source_id: int, target_id: int, knees_num: int):
+def source_target_distance(adjacency_list: dict, source_id: int, target_id: int, knees_num: int):
     source_tree, target_tree, inter = find_tree_from_list(adjacency_list, source_id, target_id, knees_num)
-    print(target_id)
     if inter is not None:
         return len(source_tree.keys()) + len(target_tree.keys())
-    return None
