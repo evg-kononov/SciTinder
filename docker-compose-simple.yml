@@ -16,25 +16,10 @@ services:
       - redis-network
     restart: always
 
-  torch-serve:
-    hostname: torch-serve
-    env_file:
-      - .env
-    build:
-      context: ./torch-serve
-    ports:
-      - ${TORCH_SERVE_EXTERNAL_INFERENCE_PORT}:${TORCH_SERVE_INFERENCE_PORT}
-    networks:
-      - torch-serve-network
-    stdin_open: true
-    tty: true
-    restart: on-failure
-
   fast-api:
     hostname: fast-api
     depends_on:
       - redis
-      - torch-serve
     env_file:
       - .env
     # Path to Dockerfile relative to docker-compose.yml
@@ -47,7 +32,6 @@ services:
       - ${FAST_API_EXTERNAL_PORT}:${FAST_API_PORT}
     networks:
       - redis-network
-      - torch-serve-network
       - fast-api-network
     stdin_open: true
     tty: true
@@ -70,7 +54,6 @@ services:
       - "5012:3012"
     networks:
       - redis-network
-      - torch-serve-network
       - fast-api-network
     stdin_open: true
     tty: true
@@ -93,7 +76,6 @@ services:
       - "5022:3022"
     networks:
       - redis-network
-      - torch-serve-network
       - fast-api-network
     stdin_open: true
     tty: true
@@ -117,5 +99,4 @@ volumes:
 networks:
   spring-boot-network:
   redis-network:
-  torch-serve-network:
   fast-api-network:
