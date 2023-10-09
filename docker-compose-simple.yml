@@ -50,7 +50,7 @@ services:
       - ./fast-api:/fast-api
       - ./data:/fast-api/data:ro # TODO: нужно ли так писать, если уже смонтирован ./fast-api со всеми вложенными папками?
     ports:
-      - "5012:3012"
+      - ${FAST_API_EXTERNAL_PORT}:${FAST_API_PORT}
     networks:
       - redis-network
       - fast-api-network
@@ -71,7 +71,7 @@ services:
       - ./fast-api:/fast-api
       - ./data:/fast-api/data:ro # TODO: нужно ли так писать, если уже смонтирован ./fast-api со всеми вложенными папками?
     ports:
-      - "5022:3022"
+      - ${FAST_API_EXTERNAL_PORT}:${FAST_API_PORT}
     networks:
       - redis-network
       - fast-api-network
