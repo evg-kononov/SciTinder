@@ -62,7 +62,6 @@ services:
     hostname: fast-api3
     depends_on:
       - redis
-      - torch-serve
     env_file:
       - .env
     # Path to Dockerfile relative to docker-compose.yml
