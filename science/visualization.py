@@ -42,10 +42,12 @@ def plot_handshake_distribution(handshake_number: list,  plt_style="seaborn-brig
     plt.rcParams["font.size"] = f"{font_size}"
 
     handshake_number = np.array(handshake_number)
-
+    x = np.sort(np.unique(handshake_number))
+    
     fig, ax = plt.subplots(1, 1, figsize=(7, 5), dpi=dpi)
-    sns.histplot(data=handshake_number, ax=ax, stat="percent")
+    sns.histplot(data=handshake_number, ax=ax, stat="probability", discrete=True)
     ax.set_xlabel("Длина пути")
-    ax.set_ylabel("Вероятность, %")
+    ax.set_ylabel("Вероятность")
+    ax.set_xticks(x)
     plt.show()
 
