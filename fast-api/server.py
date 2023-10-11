@@ -14,10 +14,12 @@ def counter():
     return value[0]
 
 
+key = "counter"
+r.set(key, "0")
 @app.get("/counter-redis")
 def counter():
-    value[0] += 1
-    return value[0]
+    r.incr(key)
+    return r.get(key)
 
 
 if __name__ == "__main__":

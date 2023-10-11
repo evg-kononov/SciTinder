@@ -40,7 +40,7 @@ def entourage_coverage(adjacency_list, required_idxs=None, k=5, parallel=False):
         required_idxs = list(adjacency_list.keys())
 
     if parallel:
-        with Pool() as pool:
+        with Pool(processes=4) as pool:
             source_entourages = list(pool.starmap(
                     find_entourage_for_stats,
                     zip(repeat(adjacency_list), required_idxs, repeat(k))
@@ -69,7 +69,7 @@ def handshake_distribution(adjacency_list, required_idxs=None, k=10, parallel=Fa
     handshake_number = []
     if parallel:
         for source_id in tqdm(required_idxs):
-            with Pool() as pool:
+            with Pool(processes=4) as pool:
                 distances = list(pool.starmap(
                     source_target_distance,
                     zip(repeat(adjacency_list), repeat(source_id), list(adjacency_list.keys()), repeat(k // 2))
@@ -104,10 +104,10 @@ if __name__ == "__main__":
 
     required_idxs = get_required_idxs(author_df, organization_df, organization_name)
 
-    #source_entourages = entourage_coverage(adjacency_list, required_idxs, 5)
+    source_entourages = entourage_coverage(adjacency_list, required_idxs, 5, parallel=True)
     #plot_entourage_coverage(source_entourages)
 
-    handshake_number = handshake_distribution(adjacency_list, required_idxs)
+    #handshake_number = handshake_distribution(adjacency_list, required_idxs, parallel=True)
 
 
 
