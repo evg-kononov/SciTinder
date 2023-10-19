@@ -13,7 +13,7 @@ import requests
 import torch
 from fastapi import FastAPI, Body, UploadFile, File, HTTPException, Form
 from pydantic import BaseModel, Field
-from util import dot_score
+from util import dot_score, find_by_id
 from resources import *
 from config import *
 from entourage_search import author_preparation, async_get_data_from_list
@@ -50,7 +50,12 @@ class Filter(BaseModel):
 
 
 class SimilarityResponse(BaseModel):
-    similarity: Union[List[float], None] = list() # How to validate list of floats? (Field(ge=0, le=1)...)
+    id: int
+    name: str
+    h_index: Union[int, None] = None
+    scopus_id: Union[int, None] = None
+    organization: Union[dict, None] = None
+    similarity: float
 
 
 def apply_filter(filter: Filter):
@@ -85,7 +90,7 @@ def similarity_search( # async def or just "def"???
         target_filter: Annotated[Union[Filter, None], Body()] = None,
         top_k: Annotated[Union[int, None], Body(gt=0)] = 10,
         exclude_coauthors: Annotated[Union[bool, None], Body()] = True
-) -> SimilarityResponse:
+) -> list[SimilarityResponse]:
     corpus_embeddings = cache_data["corpus_embeddings"]
     embedding_idxs = cache_data["embedding_idxs"]
     if len(corpus_embeddings) != len(embedding_idxs):
@@ -109,8 +114,14 @@ def similarity_search( # async def or just "def"???
     similarity, target_idxs = calculate_similarity(query_embedding, corpus_embeddings, embedding_idxs, top_k)
 
     # TODO: здесь добавляем остальную метаинформацию о ученых и возвращаем вместе с similarity
+    idxs_sim_dict = dict(zip(target_idxs, similarity))
+    response = find_by_id(target_idxs, GET_AUTHOR_BY_ID)
+    for i, author in enumerate(response):
+        author["similarity"] = idxs_sim_dict[author["id"]]
+        response[i] = SimilarityResponse(**author)
 
-    response = SimilarityResponse(similarity=similarity)
+    # TODO: сделать сортировку response по similarity
+    # response = SimilarityResponse(similarity=similarity)
     return response
 
 
@@ -119,7 +130,7 @@ def similarity_search( # async def or just "def"???
         prompt: Annotated[List[str], Body(title="Prompt", description="A text(s) used to search for closest scientists")],
         target_filter: Annotated[Union[Filter, None], Body()] = None,
         top_k: Annotated[Union[int, None], Body(gt=0)] = 10,
-) -> SimilarityResponse:
+) -> list[SimilarityResponse]:
     corpus_embeddings = cache_data["corpus_embeddings"]
     embedding_idxs = cache_data["embedding_idxs"]
     if len(corpus_embeddings) != len(embedding_idxs):
@@ -135,7 +146,15 @@ def similarity_search( # async def or just "def"???
     query_embedding = sbert_predict(prompt)
     similarity, target_idxs = calculate_similarity(query_embedding, corpus_embeddings, embedding_idxs, top_k)
 
-    response = SimilarityResponse(similarity=similarity)
+    # TODO: здесь добавляем остальную метаинформацию о ученых и возвращаем вместе с similarity
+    idxs_sim_dict = dict(zip(target_idxs, similarity))
+    authors = find_by_id(target_idxs, GET_AUTHOR_BY_ID)
+    for author in authors:
+        author["similarity"] = idxs_sim_dict[author["id"]]
+
+    # TODO: сделать нормальный response черезе Similarity, чтобы свагер мог это пропарсить и сказать пользователю, что возвращает API
+    # response = SimilarityResponse(similarity=similarity)
+    response = {"authors": authors}
     return response
 
 
@@ -158,7 +177,7 @@ def similarity_search(
             Union[str, None], Form(title="UUID", description="UUID of filter that have been saved in redis")
         ] = None,
         top_k: Annotated[Union[int, None], Form(gt=0)] = 10,
-) -> SimilarityResponse:
+) -> list[SimilarityResponse]:
     target_filter = None
     if target_uuid:
         target_filter = json.loads(r.get(target_uuid))
@@ -184,7 +203,15 @@ def similarity_search(
     query_embedding = sbert_predict(prompt)
     similarity, target_idxs = calculate_similarity(query_embedding, corpus_embeddings, embedding_idxs, top_k)
 
-    response = SimilarityResponse(similarity=similarity)
+    # TODO: здесь добавляем остальную метаинформацию о ученых и возвращаем вместе с similarity
+    idxs_sim_dict = dict(zip(target_idxs, similarity))
+    authors = find_by_id(target_idxs, GET_AUTHOR_BY_ID)
+    for author in authors:
+        author["similarity"] = idxs_sim_dict[author["id"]]
+
+    # TODO: сделать нормальный response черезе Similarity, чтобы свагер мог это пропарсить и сказать пользователю, что возвращает API
+    # response = SimilarityResponse(similarity=similarity)
+    response = {"authors": authors}
     return response
 
 

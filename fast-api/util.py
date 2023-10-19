@@ -1,4 +1,12 @@
+import asyncio
 import torch
+from entourage_search import async_get_data_from_list
+
+
+def find_by_id(author_idxs: list, url: str):
+    urls = [url.format(author_id) for author_id in author_idxs]
+    data = asyncio.run(async_get_data_from_list(urls))
+    return data
 
 
 def dot_score(a: torch.Tensor, b: torch.Tensor):
