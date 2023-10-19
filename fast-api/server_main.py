@@ -19,7 +19,7 @@ from config import *
 from entourage_search import author_preparation, async_get_data_from_list
 from visualization import graph_visualization, graph_data_preparation, create_edges, create_nodes
 
-r = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, decode_responses=True)
+#r = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, decode_responses=True)
 
 cache_data = {}
 cache_data["adjacency_list"] = load_adjacency_list(adjacency_list_path)
@@ -58,6 +58,10 @@ class SimilarityResponse(BaseModel):
     similarity: float
 
 
+class SimilarityResponseKey(BaseModel):
+    authors: List[SimilarityResponse]
+
+
 def apply_filter(filter: Filter):
     pass
 
@@ -84,13 +88,25 @@ def calculate_similarity(query_embedding, corpus_embeddings, embedding_idxs, top
     return similarity, target_idxs
 
 
+def similarity_search_response(similarity, target_idxs):
+    idxs_sim_dict = dict(zip(target_idxs, similarity))
+    response = find_by_id(target_idxs, GET_AUTHOR_BY_ID)
+    for i, author in enumerate(response):
+        author["similarity"] = idxs_sim_dict[author["id"]]
+        response[i] = SimilarityResponse(**author)
+
+    # response.sort(key=lambda x: x.similarity, reverse=True) Вроде бы уже сортируется
+    response = SimilarityResponseKey(authors=response)
+    return response
+
+
 @app.post("/similarity-search/findById/")
 def similarity_search( # async def or just "def"???
         source_id: Annotated[int, Body(title="Source ID", description="Scientist ID from the database (primary key)")],
         target_filter: Annotated[Union[Filter, None], Body()] = None,
         top_k: Annotated[Union[int, None], Body(gt=0)] = 10,
         exclude_coauthors: Annotated[Union[bool, None], Body()] = True
-) -> list[SimilarityResponse]:
+) -> SimilarityResponseKey:
     corpus_embeddings = cache_data["corpus_embeddings"]
     embedding_idxs = cache_data["embedding_idxs"]
     if len(corpus_embeddings) != len(embedding_idxs):
@@ -112,16 +128,7 @@ def similarity_search( # async def or just "def"???
         required_idxs = apply_filter(filter=target_filter)
 
     similarity, target_idxs = calculate_similarity(query_embedding, corpus_embeddings, embedding_idxs, top_k)
-
-    # TODO: здесь добавляем остальную метаинформацию о ученых и возвращаем вместе с similarity
-    idxs_sim_dict = dict(zip(target_idxs, similarity))
-    response = find_by_id(target_idxs, GET_AUTHOR_BY_ID)
-    for i, author in enumerate(response):
-        author["similarity"] = idxs_sim_dict[author["id"]]
-        response[i] = SimilarityResponse(**author)
-
-    # TODO: сделать сортировку response по similarity
-    # response = SimilarityResponse(similarity=similarity)
+    response = similarity_search_response(similarity, target_idxs)
     return response
 
 
@@ -130,7 +137,7 @@ def similarity_search( # async def or just "def"???
         prompt: Annotated[List[str], Body(title="Prompt", description="A text(s) used to search for closest scientists")],
         target_filter: Annotated[Union[Filter, None], Body()] = None,
         top_k: Annotated[Union[int, None], Body(gt=0)] = 10,
-) -> list[SimilarityResponse]:
+) -> SimilarityResponseKey:
     corpus_embeddings = cache_data["corpus_embeddings"]
     embedding_idxs = cache_data["embedding_idxs"]
     if len(corpus_embeddings) != len(embedding_idxs):
@@ -145,16 +152,7 @@ def similarity_search( # async def or just "def"???
 
     query_embedding = sbert_predict(prompt)
     similarity, target_idxs = calculate_similarity(query_embedding, corpus_embeddings, embedding_idxs, top_k)
-
-    # TODO: здесь добавляем остальную метаинформацию о ученых и возвращаем вместе с similarity
-    idxs_sim_dict = dict(zip(target_idxs, similarity))
-    authors = find_by_id(target_idxs, GET_AUTHOR_BY_ID)
-    for author in authors:
-        author["similarity"] = idxs_sim_dict[author["id"]]
-
-    # TODO: сделать нормальный response черезе Similarity, чтобы свагер мог это пропарсить и сказать пользователю, что возвращает API
-    # response = SimilarityResponse(similarity=similarity)
-    response = {"authors": authors}
+    response = similarity_search_response(similarity, target_idxs)
     return response
 
 
@@ -177,7 +175,7 @@ def similarity_search(
             Union[str, None], Form(title="UUID", description="UUID of filter that have been saved in redis")
         ] = None,
         top_k: Annotated[Union[int, None], Form(gt=0)] = 10,
-) -> list[SimilarityResponse]:
+) -> SimilarityResponseKey:
     target_filter = None
     if target_uuid:
         target_filter = json.loads(r.get(target_uuid))
@@ -202,16 +200,7 @@ def similarity_search(
 
     query_embedding = sbert_predict(prompt)
     similarity, target_idxs = calculate_similarity(query_embedding, corpus_embeddings, embedding_idxs, top_k)
-
-    # TODO: здесь добавляем остальную метаинформацию о ученых и возвращаем вместе с similarity
-    idxs_sim_dict = dict(zip(target_idxs, similarity))
-    authors = find_by_id(target_idxs, GET_AUTHOR_BY_ID)
-    for author in authors:
-        author["similarity"] = idxs_sim_dict[author["id"]]
-
-    # TODO: сделать нормальный response черезе Similarity, чтобы свагер мог это пропарсить и сказать пользователю, что возвращает API
-    # response = SimilarityResponse(similarity=similarity)
-    response = {"authors": authors}
+    response = similarity_search_response(similarity, target_idxs)
     return response
 
 

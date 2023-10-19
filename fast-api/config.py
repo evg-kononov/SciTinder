@@ -6,7 +6,7 @@ if not os.getenv("DOCKER"):
     REDIS_HOST = "localhost"
     REDIS_PORT = 6379
 
-    TORCH_SERVE_API = "http://127.0.0.1:8085"
+    TORCH_SERVE_API = "http://0.0.0.0:3010"
     TORCH_SERVE_PREDICT_URL = TORCH_SERVE_API + "/predictions/" + TORCH_SERVE_MODEL_NAME
 
     SPRING_API = "http://localhost:8080/"

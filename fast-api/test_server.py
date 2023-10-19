@@ -48,4 +48,7 @@ def test_crete_figure():
     )
     return response
 
+if __name__ == "__main__":
+    response = test_similarity_search_findById()
+
 
