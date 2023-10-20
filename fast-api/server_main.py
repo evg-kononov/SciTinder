@@ -89,6 +89,7 @@ def calculate_similarity(query_embedding, corpus_embeddings, embedding_idxs, top
 
 
 def similarity_search_response(similarity, target_idxs):
+    similarity = np.round(similarity, decimals=3) * 100
     idxs_sim_dict = dict(zip(target_idxs, similarity))
     response = find_by_id(target_idxs, GET_AUTHOR_BY_ID)
     for i, author in enumerate(response):
