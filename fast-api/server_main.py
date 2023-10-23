@@ -101,7 +101,7 @@ def similarity_search_response(similarity, target_idxs):
     return response
 
 
-@app.post("/similarity-search/findById/")
+@app.post("/similarity-search/findById")
 def similarity_search( # async def or just "def"???
         source_id: Annotated[int, Body(title="Source ID", description="Scientist ID from the database (primary key)")],
         target_filter: Annotated[Union[Filter, None], Body()] = None,
@@ -133,7 +133,7 @@ def similarity_search( # async def or just "def"???
     return response
 
 
-@app.post("/similarity-search/findByPrompt/") # or app.put or app.post??? because "get" doesn't have a "request body"
+@app.post("/similarity-search/findByPrompt") # or app.put or app.post??? because "get" doesn't have a "request body"
 def similarity_search( # async def or just "def"???
         prompt: Annotated[List[str], Body(title="Prompt", description="A text(s) used to search for closest scientists")],
         target_filter: Annotated[Union[Filter, None], Body()] = None,
@@ -157,7 +157,7 @@ def similarity_search( # async def or just "def"???
     return response
 
 
-@app.post("/caching/filter/")
+@app.post("/caching/filter")
 def filter_caching(
         target_filter: Annotated[Union[Filter, None], Body()],
 ) -> str:
@@ -166,7 +166,7 @@ def filter_caching(
     return target_uuid
 
 
-@app.post("/similarity-search/findByFile/")
+@app.post("/similarity-search/findByFile")
 def similarity_search(
         files: Annotated[
             List[UploadFile],
@@ -205,7 +205,7 @@ def similarity_search(
     return response
 
 
-@app.post("/plotly/create-figure/")
+@app.post("/plotly/create-figure")
 def create_figure(
         source_id: Annotated[int, Body(title="Source ID", description="Scientist ID from the database (primary key)")],
         target_id: Annotated[int, Body(title="Target ID", description="Scientist ID from the database (primary key)")],
