@@ -12,7 +12,7 @@ from typing import Union, Annotated, List, Set
 import requests
 import torch
 from fastapi import FastAPI, Body, UploadFile, File, HTTPException, Form
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from util import dot_score, find_by_id
 from resources import *
 from config import *
@@ -57,6 +57,11 @@ class SimilarityResponse(BaseModel):
     organization: Union[dict, None] = None
     similarity: float
 
+    @field_validator("similarity")
+    @classmethod
+    def similarity_round(cls, v: float) -> float:
+        return round(v * 100, 1)
+
 
 class SimilarityResponseKey(BaseModel):
     authors: List[SimilarityResponse]
@@ -88,8 +93,7 @@ def calculate_similarity(query_embedding, corpus_embeddings, embedding_idxs, top
     return similarity, target_idxs
 
 
-def similarity_search_response(similarity, target_idxs):
-    similarity = np.round(similarity, decimals=3) * 100
+def similarity_search_response(similarity: np.array, target_idxs):
     idxs_sim_dict = dict(zip(target_idxs, similarity))
     response = find_by_id(target_idxs, GET_AUTHOR_BY_ID)
     for i, author in enumerate(response):
@@ -105,7 +109,7 @@ def similarity_search_response(similarity, target_idxs):
 def similarity_search( # async def or just "def"???
         source_id: Annotated[int, Body(title="Source ID", description="Scientist ID from the database (primary key)")],
         target_filter: Annotated[Union[Filter, None], Body()] = None,
-        top_k: Annotated[Union[int, None], Body(gt=0)] = 100,
+        top_k: Annotated[Union[int, None], Body(gt=0)] = 10,
         exclude_coauthors: Annotated[Union[bool, None], Body()] = True
 ) -> SimilarityResponseKey:
     corpus_embeddings = cache_data["corpus_embeddings"]
@@ -137,7 +141,7 @@ def similarity_search( # async def or just "def"???
 def similarity_search( # async def or just "def"???
         prompt: Annotated[List[str], Body(title="Prompt", description="A text(s) used to search for closest scientists")],
         target_filter: Annotated[Union[Filter, None], Body()] = None,
-        top_k: Annotated[Union[int, None], Body(gt=0)] = 100,
+        top_k: Annotated[Union[int, None], Body(gt=0)] = 10,
 ) -> SimilarityResponseKey:
     corpus_embeddings = cache_data["corpus_embeddings"]
     embedding_idxs = cache_data["embedding_idxs"]
@@ -175,7 +179,7 @@ def similarity_search(
         target_uuid: Annotated[
             Union[str, None], Form(title="UUID", description="UUID of filter that have been saved in redis")
         ] = None,
-        top_k: Annotated[Union[int, None], Form(gt=0)] = 100,
+        top_k: Annotated[Union[int, None], Form(gt=0)] = 10,
 ) -> SimilarityResponseKey:
     target_filter = None
     if target_uuid:
