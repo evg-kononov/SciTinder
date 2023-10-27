@@ -24,7 +24,7 @@ def counter():
     return r.get(key)
 
 
-@app.get("/leaderboard/range/")
+@app.get("/leaderboard/range")
 def view(
         start: Annotated[int, Query()] = 0,
         end: Annotated[int, Query()] = -1
@@ -32,7 +32,7 @@ def view(
     return r.zrange(players, start, end, desc=True, withscores=True)
 
 
-@app.post("/leaderboard/add/")
+@app.post("/leaderboard/add")
 def view(
         player: Annotated[str, Query()],
         score: Annotated[int, Query()]
@@ -40,7 +40,7 @@ def view(
     return r.zadd(players, {player: score})
 
 
-@app.delete("/leaderboard/remove/")
+@app.delete("/leaderboard/remove")
 def remove(player: Annotated[Union[List[str], None], Query()] = None):
     return r.zrem(players, *player)
 
