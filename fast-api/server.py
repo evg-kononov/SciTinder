@@ -10,7 +10,7 @@ app = FastAPI()
 
 players = "Players"
 value = [0]
-@app.get("/counter/")
+@app.get("/counter")
 def counter():
     value[0] += 1
     return value[0]
@@ -18,7 +18,7 @@ def counter():
 
 key = "counter"
 r.set(key, "0")
-@app.get("/counter-redis/")
+@app.get("/counter-redis")
 def counter():
     r.incr(key)
     return r.get(key)
@@ -32,12 +32,20 @@ def view(
     return r.zrange(players, start, end, desc=True, withscores=True)
 
 
-@app.post("/leaderboard/add")
+@app.put("/leaderboard/update")
 def view(
         player: Annotated[str, Query()],
         score: Annotated[int, Query()]
 ):
-    return r.zadd(players, {player: score})
+    return r.zadd(players, {player: score}, xx=True)
+
+
+@app.put("/leaderboard/create")
+def view(
+        player: Annotated[str, Query()],
+        score: Annotated[int, Query()]
+):
+    return r.zadd(players, {player: score}, nx=True)
 
 
 @app.delete("/leaderboard/remove")
