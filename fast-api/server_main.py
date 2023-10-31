@@ -44,7 +44,7 @@ app = FastAPI(lifespan=lifespan)
 
 
 class Filter(BaseModel):
-    organizations: Union[Set[str], None] = set()
+    organizations: Union[Set[int], None] = set()
     min_h_index: Annotated[Union[int, None], Field(ge=0)] = None
     max_h_index: Annotated[Union[int, None], Field(ge=0)] = None
 
@@ -67,7 +67,7 @@ class SimilarityResponseKey(BaseModel):
     authors: List[SimilarityResponse]
 
 
-def apply_filter(filter: Filter):
+def apply_filter(filter: Filter, embedding_idxs: list):
     pass
 
 
@@ -130,7 +130,8 @@ def similarity_search( # async def or just "def"???
         embedding_idxs = embedding_idxs[required_idxs]
 
     if target_filter:
-        required_idxs = apply_filter(filter=target_filter)
+        required_idxs = apply_filter(filter=target_filter, embedding_idxs=embedding_idxs)
+        embedding_idxs = embedding_idxs[required_idxs]
 
     similarity, target_idxs = calculate_similarity(query_embedding, corpus_embeddings, embedding_idxs, top_k)
     response = similarity_search_response(similarity, target_idxs)
