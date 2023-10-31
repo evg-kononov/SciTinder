@@ -13,7 +13,7 @@ import requests
 import torch
 from fastapi import FastAPI, Body, UploadFile, File, HTTPException, Form
 from pydantic import BaseModel, Field, field_validator
-from util import dot_score, find_by_id
+from util import dot_score, find_by_id, find_by_name_like_IDS
 from resources import *
 from config import *
 from entourage_search import author_preparation, async_get_data_from_list
@@ -44,7 +44,7 @@ app = FastAPI(lifespan=lifespan)
 
 
 class Filter(BaseModel):
-    organizations: Union[Set[int], None] = set()
+    organization_ids: Union[Set[int], None] = set()
     min_h_index: Annotated[Union[int, None], Field(ge=0)] = None
     max_h_index: Annotated[Union[int, None], Field(ge=0)] = None
 
@@ -67,7 +67,10 @@ class SimilarityResponseKey(BaseModel):
     authors: List[SimilarityResponse]
 
 
-def apply_filter(filter: Filter, embedding_idxs: list):
+def apply_filter(embedding_idxs: list, filter: Filter, base_url: str):
+    data = find_by_name_like_IDS(filter=filter, base_url=base_url)
+    idxs =
+
     pass
 
 

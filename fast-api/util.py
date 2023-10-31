@@ -1,10 +1,32 @@
 import asyncio
+import requests
 import torch
 from entourage_search import async_get_data_from_list
 
 
 def find_by_id(author_idxs: list, url: str):
     urls = [url.format(author_id) for author_id in author_idxs]
+    data = asyncio.run(async_get_data_from_list(urls))
+    return data
+
+
+def find_by_name_like_IDS(filter, base_url: str):
+    query_params = dict(
+        firstname="",
+        lastname="",
+        organizationId=filter.organization_ids[0],
+        hIndexMin=filter.min_h_index,
+        hIndexMax=filter.max_h_index,
+        page=0,
+        size=10000
+    )
+    url = base_url.format(**query_params)
+    response = requests.get(url)
+    total_pages = response.json()["totalPages"]
+    urls = []
+    for page in range(1, total_pages):
+        query_params["page"] = page
+        urls.append(base_url.format(**query_params))
     data = asyncio.run(async_get_data_from_list(urls))
     return data
 
