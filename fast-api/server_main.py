@@ -44,7 +44,7 @@ app = FastAPI(lifespan=lifespan)
 
 
 class Filter(BaseModel):
-    organization_ids: Union[Set[int], None] = set()
+    organization_ids: Union[Set[int], None] = None
     min_h_index: Annotated[Union[int, None], Field(ge=0)] = None
     max_h_index: Annotated[Union[int, None], Field(ge=0)] = None
 
@@ -68,10 +68,9 @@ class SimilarityResponseKey(BaseModel):
 
 
 def apply_filter(embedding_idxs: list, filter: Filter, base_url: str):
-    data = find_by_name_like_IDS(filter=filter, base_url=base_url)
-    idxs =
-
-    pass
+    required_idxs = find_by_name_like_IDS(filter=filter, base_url=base_url)
+    mask = np.isin(embedding_idxs, required_idxs)
+    return mask
 
 
 def sbert_predict(queries: List[str]):
@@ -133,8 +132,10 @@ def similarity_search( # async def or just "def"???
         embedding_idxs = embedding_idxs[required_idxs]
 
     if target_filter:
-        required_idxs = apply_filter(filter=target_filter, embedding_idxs=embedding_idxs)
-        embedding_idxs = embedding_idxs[required_idxs]
+        mask = apply_filter(filter=target_filter, embedding_idxs=embedding_idxs, base_url=GET_AUTHOR_BY_NAME_LIKE_IDS)
+        corpus_embeddings = corpus_embeddings[mask]
+        embedding_idxs = embedding_idxs[mask]
+
 
     similarity, target_idxs = calculate_similarity(query_embedding, corpus_embeddings, embedding_idxs, top_k)
     response = similarity_search_response(similarity, target_idxs)
@@ -155,9 +156,10 @@ def similarity_search( # async def or just "def"???
             detail="The length of 'corpus_embeddings' must be the same as the length of 'embedding_idxs'"
         )
 
-    # TODO: можно сделать функцию apply_target_filter и поставить её до подсчета score (и так во всех запросах)
     if target_filter:
-        required_idxs = apply_filter(filter=target_filter)
+        mask = apply_filter(filter=target_filter, embedding_idxs=embedding_idxs)
+        corpus_embeddings = corpus_embeddings[mask]
+        embedding_idxs = embedding_idxs[mask]
 
     query_embedding = sbert_predict(prompt)
     similarity, target_idxs = calculate_similarity(query_embedding, corpus_embeddings, embedding_idxs, top_k)
@@ -205,7 +207,9 @@ def similarity_search(
         )
 
     if target_filter:
-        required_idxs = apply_filter(filter=target_filter)
+        mask = apply_filter(filter=target_filter, embedding_idxs=embedding_idxs)
+        corpus_embeddings = corpus_embeddings[mask]
+        embedding_idxs = embedding_idxs[mask]
 
     query_embedding = sbert_predict(prompt)
     similarity, target_idxs = calculate_similarity(query_embedding, corpus_embeddings, embedding_idxs, top_k)

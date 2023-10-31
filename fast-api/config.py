@@ -20,8 +20,9 @@ else:
     SPRING_API = f"http://spring-boot-api:{os.getenv('SPRING_BOOT_API_PORT', 3001)}/"
 
 GET_AUTHOR_BY_ID = SPRING_API + "author/findById" + "?id={}"
-GET_AUTHOR_BY_NAME_LIKE = SPRING_API + "author/findByNameLikeIDS" + "?firstname={}" + "&lastname={}" +\
-                          "&organizationId={}" + "&hIndexMin={}" + "&hIndexMax={}" + "&page={}" + "&size={}"
+GET_AUTHOR_BY_NAME_LIKE_IDS = SPRING_API + "author/findByNameLikeIDS" + "?firstname={firstname}" + "&lastname={lastname}" +\
+                          "&organizationId={organizationId}" + "&hIndexMin={hIndexMin}" + "&hIndexMax={hIndexMax}" +\
+                          "&page={page}" + "&size={size}"
 
 root_path = r"./data"
 #root_path = r"D:/streamlit_data"

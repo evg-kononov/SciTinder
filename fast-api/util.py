@@ -1,7 +1,7 @@
 import asyncio
 import requests
 import torch
-from entourage_search import async_get_data_from_list
+from entourage_search import async_get_data_from_list, flatten
 
 
 def find_by_id(author_idxs: list, url: str):
@@ -11,6 +11,15 @@ def find_by_id(author_idxs: list, url: str):
 
 
 def find_by_name_like_IDS(filter, base_url: str):
+    if filter.organization_ids is not None:
+        filter.organization_ids = list(filter.organization_ids)
+    else:
+        filter.organization_ids = [""]
+    if filter.min_h_index is None:
+        filter.min_h_index = ""
+    if filter.max_h_index is None:
+        filter.max_h_index = ""
+
     query_params = dict(
         firstname="",
         lastname="",
@@ -21,13 +30,15 @@ def find_by_name_like_IDS(filter, base_url: str):
         size=10000
     )
     url = base_url.format(**query_params)
-    response = requests.get(url)
-    total_pages = response.json()["totalPages"]
+    response = requests.get(url).json()
+    total_pages = response["totalPages"]
     urls = []
     for page in range(1, total_pages):
         query_params["page"] = page
         urls.append(base_url.format(**query_params))
-    data = asyncio.run(async_get_data_from_list(urls))
+    data = [response] + asyncio.run(async_get_data_from_list(urls))
+    data = list(map(lambda x: x["authors"], data))
+    data = flatten(data)
     return data
 
 

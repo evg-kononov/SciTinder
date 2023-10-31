@@ -5,7 +5,7 @@ from server_main import app
 client = TestClient(app)
 
 def test_similarity_search_findById():
-    response = client.post(url="/similarity-search/findById/", json={"source_id": 555})
+    response = client.post(url="/similarity-search/findById/", json={"source_id": 555, "target_filter": {"min_h_index": 1, "max_h_index": 20}})
     return response
 
 
@@ -42,13 +42,14 @@ def test_crete_figure():
     response = client.post(
         url="/plotly/create-figure/",
         json={
-            "source_id": 5,
-            "target_id": 9
+            "source_id": 419187,
+            "target_id": 311651
         }
     )
     return response
 
 if __name__ == "__main__":
     response = test_similarity_search_findById()
+    resp = test_crete_figure()
 
 
