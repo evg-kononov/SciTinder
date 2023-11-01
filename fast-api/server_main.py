@@ -130,6 +130,10 @@ def similarity_search( # async def or just "def"???
         required_idxs = np.isin(embedding_idxs, coauthors, invert=True)
         corpus_embeddings = corpus_embeddings[required_idxs]
         embedding_idxs = embedding_idxs[required_idxs]
+    else:
+        required_idxs = np.isin(embedding_idxs, [source_id], invert=True)
+        corpus_embeddings = corpus_embeddings[required_idxs]
+        embedding_idxs = embedding_idxs[required_idxs]
 
     if target_filter:
         mask = apply_filter(filter=target_filter, embedding_idxs=embedding_idxs, base_url=GET_AUTHOR_BY_NAME_LIKE_IDS)
