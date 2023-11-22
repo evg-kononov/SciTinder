@@ -1,7 +1,11 @@
 import redis
 import uvicorn
+import time
+import random
 from typing import List, Annotated, Union
 from fastapi import FastAPI, Query
+from rq import Queue
+from rq.job import Job
 from config import *
 
 r = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, decode_responses=True)
@@ -52,6 +56,30 @@ def view(
 def remove(player: Annotated[Union[List[str], None], Query()] = None):
     return r.zrem(players, *player)
 
+
+queue_name = "FileOps"
+q = Queue(name=queue_name, connection=r)
+
+
+def read(lines):
+    return lines
+
+
+@app.get("/queue/files/{file_path:path}")
+def read_file(file_path: str):
+    with open(file_path) as f:
+        lines = f.readlines()
+    time.sleep(random.randrange(1, 10))
+    job = q.enqueue(read, lines)
+    return job.id
+
+
+@app.get("/queue/process")
+def read_file(job_id: str):
+    time.sleep(random.randrange(1, 10))
+    job = Job.fetch(job_id)
+    result = job.return_value()
+    return result
 
 
 if __name__ == "__main__":
