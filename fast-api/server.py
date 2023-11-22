@@ -6,6 +6,7 @@ from typing import List, Annotated, Union
 from fastapi import FastAPI, Query
 from rq import Queue
 from rq.job import Job
+from rq.registry import StartedJobRegistry
 from config import *
 
 r = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, decode_responses=True)
@@ -80,6 +81,12 @@ def read_file(job_id: str):
     job = Job.fetch(job_id, connection=r)
     result = job.return_value()
     return result
+
+
+@app.get("/queue/job-ids")
+def read_file():
+    registry = StartedJobRegistry(queue_name, connection=r)
+    return registry.get_job_ids()
 
 
 if __name__ == "__main__":
