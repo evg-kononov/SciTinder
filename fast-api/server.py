@@ -78,7 +78,7 @@ def read_file(file_path: str):
 @app.get("/queue/process")
 def read_file(job_id: str):
     time.sleep(random.randrange(1, 10))
-    job = Job.fetch(job_id[1:-1], connection=r)
+    job = Job.fetch(job_id, connection=r)
     result = job.return_value()
     return {"res": result}
 
