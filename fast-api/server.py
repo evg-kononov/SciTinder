@@ -89,5 +89,55 @@ def read_file():
     return registry.get_job_ids()
 
 
+import boto3
+session = boto3.session.Session()
+s3 = session.client(
+    service_name='s3',
+    endpoint_url='https://storage.yandexcloud.net'
+)
+
+
+@app.get("/bucket/create")
+def create_bucket(bucket_name: str):
+    response = s3.create_bucket(Bucket=bucket_name)
+    return response["ResponseMetadata"]["HTTPStatusCode"]
+
+
+@app.get("/bucket/delete")
+def delete_bucket(bucket_name: str):
+    response = s3.delete_bucket(Bucket=bucket_name)
+    return response["ResponseMetadata"]["HTTPStatusCode"]
+
+
+@app.get("/bucket/list")
+def bucket_list():
+    response = s3.list_buckets()
+    return response["buckets"]
+
+
+@app.get("/bucket/object/upload")
+def upload_data(src: str, bucket_name: str, dst: str):
+    response = s3.upload_file(src, bucket_name, dst)
+    return response
+
+
+@app.get("/bucket/object/delete")
+def delete_data(bucket_name: str, object_name: str):
+    response = s3.delete_object(Bucket=bucket_name, Key=object_name)
+    return response
+
+
+@app.get("/bucket/object/get")
+def delete_data(bucket_name: str, object_name: str):
+    response = s3.get_object(Bucket=bucket_name, Key=object_name)
+    return response
+
+
+@app.get("/bucket/data/list")
+def data_list(bucket_name: str):
+    response = s3.list_objects(Bucket=bucket_name)
+    return response["Contents"]
+
+
 if __name__ == "__main__":
     uvicorn.run(app, host="127.0.0.1", port=8009)
