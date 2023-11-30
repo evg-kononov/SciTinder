@@ -22,7 +22,7 @@ def counter():
 
 
 key = "counter"
-r.set(key, "0")
+# r.set(key, "0")
 @app.get("/counter-redis")
 def counter():
     r.incr(key)
@@ -59,7 +59,7 @@ def remove(player: Annotated[Union[List[str], None], Query()] = None):
 
 
 queue_name = "FileOps"
-q = Queue(name=queue_name, connection=r)
+# q = Queue(name=queue_name, connection=r)
 
 
 def read(lines):

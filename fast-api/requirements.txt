@@ -13,3 +13,4 @@ pyarrow~=13.0.0
 fastparquet~=2023.8.0
 python-multipart~=0.0.6
 rq~=1.15.1
+boto3~=1.33.2
