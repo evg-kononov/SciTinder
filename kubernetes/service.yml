@@ -1,0 +1,11 @@
+kind: Service
+apiVersion: v1
+metadata:
+ name: counter-service
+spec:
+ type: LoadBalancer
+ selector:
+   app: counter
+ ports:
+ - port: 80
+   targetPort: 5002

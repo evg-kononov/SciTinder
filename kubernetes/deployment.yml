@@ -1,0 +1,20 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+ name: counter-deployment
+spec:
+ replicas: 1
+ selector:
+   matchLabels:
+     app: counter
+ template:
+   metadata:
+     labels:
+       app: counter
+   spec:
+     containers:
+     - name: counter-app
+       image: docker.io/scitinder-fast-api:latest
+       imagePullPolicy: Never
+       ports:
+       - containerPort: 5002

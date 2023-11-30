@@ -9,7 +9,7 @@ from rq.job import Job
 from rq.registry import StartedJobRegistry
 from config import *
 
-r = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, decode_responses=True)
+#r = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, decode_responses=True)
 
 app = FastAPI()
 
@@ -92,8 +92,8 @@ def read_file():
 import boto3
 session = boto3.session.Session()
 s3 = session.client(
-    service_name='s3',
-    endpoint_url='https://storage.yandexcloud.net'
+    service_name="s3",
+    endpoint_url="https://storage.yandexcloud.net"
 )
 
 

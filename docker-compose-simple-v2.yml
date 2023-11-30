@@ -1,0 +1,100 @@
+version: '3'
+
+services:
+  redis:
+    hostname: redis
+    env_file:
+      - .env
+    image: redis:7.2
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+    volumes:
+      - redis:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - redis-network
+    restart: always
+
+  fast-api:
+    hostname: fast-api
+    depends_on:
+      - redis
+    env_file:
+      - .env
+    # Path to Dockerfile relative to docker-compose.yml
+    build:
+      context: ./fast-api
+    volumes:
+      - ./fast-api:/fast-api
+      - ./data:/fast-api/data:ro
+    ports:
+      - "5002:3002"
+    networks:
+      - redis-network
+      - fast-api-network
+    stdin_open: true
+    tty: true
+    restart: on-failure
+
+  fast-api2:
+    hostname: fast-api2
+    depends_on:
+      - redis
+    env_file:
+      - .env
+    # Path to Dockerfile relative to docker-compose.yml
+    build:
+      context: ./fast-api
+    volumes:
+      - ./fast-api:/fast-api
+      - ./data:/fast-api/data:ro # TODO: нужно ли так писать, если уже смонтирован ./fast-api со всеми вложенными папками?
+    ports:
+      - "5032:3002"
+    networks:
+      - redis-network
+      - fast-api-network
+    stdin_open: true
+    tty: true
+    restart: on-failure
+
+  fast-api3:
+    hostname: fast-api3
+    depends_on:
+      - redis
+    env_file:
+      - .env
+    # Path to Dockerfile relative to docker-compose.yml
+    build:
+      context: ./fast-api
+    volumes:
+      - ./fast-api:/fast-api
+      - ./data:/fast-api/data:ro # TODO: нужно ли так писать, если уже смонтирован ./fast-api со всеми вложенными папками?
+    ports:
+      - "5022:3002"
+    networks:
+      - redis-network
+      - fast-api-network
+    stdin_open: true
+    tty: true
+    restart: on-failure
+
+  nginx:
+    hostname: nginx
+    image: nginx
+    volumes:
+      - ./nginx:/etc/nginx/conf.d
+    ports:
+      - "80:80"
+    networks:
+      - fast-api-network
+    restart: always
+
+volumes:
+  redis:
+    driver: local
+
+networks:
+  spring-boot-network:
+  redis-network:
+  fast-api-network:
